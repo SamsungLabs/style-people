@@ -1,0 +1,141 @@
+log:
+    experiment_name: "default"
+    
+    log_freq: 999
+    log_val_freq: 1
+    log_vis_freq: 20
+    log_n_samples: -1
+    log_n_rotation_samples: 64
+        
+inferer:
+    faces_path: data/uv_renderer/face_tex.npy
+    uv_vert_values_path: data/uv_renderer/uv.npy
+
+    # smplx
+    body_models_path: data
+    n_mean_latent: 10000
+    
+runner:
+    init_with_encoder: true
+    save_checkpoint: false
+
+    white: false # specify this to generate images on white background
+
+    texture_segm_path: data/texture_segm_256.pkl
+    v_inds_path: data/v_inds.npy
+    copy_hand_texture: false
+    
+stages:
+    stage_1:
+        input_source: latent_and_noise
+        n_iters: 100
+
+        optimization_targets:
+            - latent
+            - beta
+            # - body_pose
+
+        lr:
+            latent: 0.01
+            beta: 0.1
+
+        loss_weight:
+            lpips: 1.0
+            mse: 0.5
+            face_lpips: 0.5
+            encoder_latent_deviation: 0.1
+            generator_params_deviation: 0.0
+            ntexture_deviation: 0.0
+            unary_discriminator_nonsaturating: 0.0
+            unary_discriminator_feature_matching: 0.0
+            unary_face_discriminator_feature_matching: 0.0
+
+    stage_2:
+        input_source: latent_and_noise
+        n_iters: 70
+
+        optimization_targets:
+            - generator
+            - beta
+
+        lr: 
+            generator: 0.01
+            beta: 0.1
+
+        loss_weight:
+            lpips: 1.0
+            mse: 0.5
+            face_lpips: 1.0
+            encoder_latent_deviation: 0.0
+            generator_params_deviation: 1.0
+            ntexture_deviation: 0.0  ## TODO
+            unary_discriminator_nonsaturating: 0.0
+            unary_discriminator_feature_matching: 0.0
+            unary_face_discriminator_feature_matching: 0.0
+
+    stage_3:
+        input_source: latent_and_noise
+        n_iters: 30
+
+        optimization_targets:
+            - noise
+            - beta
+
+        lr:
+            noise: 0.1
+            beta: 0.1
+
+        loss_weight:
+            lpips: 1.0
+            mse: 0.5
+            face_lpips: 0.0
+            encoder_latent_deviation: 0.0
+            generator_params_deviation: 0.0
+            ntexture_deviation: 0.0
+            unary_discriminator_nonsaturating: 0.0
+            unary_discriminator_feature_matching: 0.0
+            unary_face_discriminator_feature_matching: 0.0
+        
+    stage_4:
+        input_source: ntexture
+        n_iters: 200
+
+        optimization_targets:
+            - ntexture
+
+        lr:
+            ntexture: 0.15
+            beta: 0.1
+
+        loss_weight:
+            lpips: 1.0
+            mse: 0.5
+            face_lpips: 2.0
+            encoder_latent_deviation: 0.0
+            generator_params_deviation: 0.0
+            ntexture_deviation: 0.1
+            unary_discriminator_nonsaturating: 0.0
+            unary_discriminator_feature_matching: 0.0
+            unary_face_discriminator_feature_matching: 0.0
+            
+generator:
+    experiment_dir: data
+    checkpoint_name: generator.pth.tar
+    
+    image_h: 512
+    image_w: 512
+
+    render_h: 256
+    render_w: 256
+
+    divide_n_channels: 1
+    
+encoder:
+    experiment_dir: data
+    checkpoint_name: encoder.pth
+
+    bbox_scale: 1.2
+    image_size: 512
+    
+random_seed: 0
+device: "cuda:0"
