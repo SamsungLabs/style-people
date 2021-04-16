@@ -1,57 +1,43 @@
-from models.generator import Generator
 import pickle
-
 import numpy as np
 import smplx
 import torch
+import importlib
 
 import models
 from models.generator import Generator
 from models.renderer import Renderer
 from utils.bbox import get_ltrb_bbox, crop_resize_verts
-from utils.common import get_rotation_matrix, to_sigm
+from utils.common import get_rotation_matrix, rotate_verts, to_sigm
+from utils.common import dict2device, setup_environment
 from utils.uv_renderer import UVRenderer
 
+import os
+import collections
+import pydoc
 
-def rotate_verts(vertices, angle, K, K_inv, axis='y', mean_point=None):
-    rot_mat = get_rotation_matrix(angle, axis)
-    rot_mat = torch.FloatTensor(rot_mat).to(vertices.device).unsqueeze(0)
+import hydra
+from omegaconf import OmegaConf 
+import yaml
 
-    vertices_world = torch.bmm(vertices, K_inv.transpose(1, 2))
-    if mean_point is None:
-        mean_point = vertices_world.mean(dim=1)
+import inference_module
+from dataloaders.inference_loader import ExampleDataset
 
-    vertices_rot = vertices_world - mean_point
-    vertices_rot = torch.bmm(vertices_rot, rot_mat.transpose(1, 2))
-    vertices_rot = vertices_rot + mean_point
-    vertices_rot_cam = torch.bmm(vertices_rot, K.transpose(1, 2))
-
-    return vertices_rot_cam, mean_point
-
-
-def load_models(checkpoint_path='data/checkpoint.pth', device='cuda:0'):
-    ainp_path = 'data/spectral_texture16.pth'
-    ainp_scales = [64, 128, 256, 512]
-
-    ainp_tensor = torch.load(ainp_path)
-    generator = Generator(ainp_tensor=ainp_tensor, ainp_scales=ainp_scales).to(device)
-    renderer = Renderer().to(device)
-
-    checkpoint = torch.load(checkpoint_path)
-    generator.load_state_dict(checkpoint['g'])
-    renderer.load_state_dict(checkpoint['r'])
-
-    generator.eval()
-    renderer.eval()
-
-    return generator, renderer
+from inference_module.inferer import load_models, get_config
 
 
 class DemoInferer():
-
     def __init__(self, checkpoint_path, smplx_model_path, imsize=1024, device='cuda:0'):
         self.smplx_model = smplx.body_models.SMPLX(smplx_model_path).to(device)
-        self.generator, self.renderer = load_models(checkpoint_path)
+        
+        self.checkpoint_path = checkpoint_path
+        experiment_dir = '/'.join(self.checkpoint_path.split('/')[:-2])
+        checkpoint_file = self.checkpoint_path.split('/')[-1]
+        
+        self.generator_config = get_config(experiment_dir)
+        self.models = load_models(experiment_dir, self.generator_config, checkpoint_file)
+
+        self.generator, self.renderer = self.models['generator'], self.models['renderer']
         self.v_inds = torch.LongTensor(np.load('data/v_inds.npy')).to(device)
         self.input_size = imsize // 2  # input resolution is twice as small as output
 
@@ -59,10 +45,36 @@ class DemoInferer():
 
         self.device = device
         self.style_dim = 512
+        
+    def infer(self, config, input_path, train_frames, val_frames, save_dir):
+        # setup environment
+        setup_environment(config.random_seed)
+
+        dataloader = ExampleDataset(root_dir=input_path, image_h=self.input_size, image_w=self.input_size)
+        train_dict = dataloader.load(frame_indices=list(map(int, train_frames.split(','))))
+        train_dict = dict2device(train_dict, self.device, dtype=torch.float32)
+
+        val_dict = dataloader.load(frame_indices=list(map(int, val_frames.split(','))))
+        val_dict = dict2device(val_dict, self.device, dtype=torch.float32)
+
+        print("Successfully loaded data")
+
+        # load inferer
+        inferer = inference_module.inferer.Inferer(self.models, self.generator_config, config)
+        inferer = inferer.to(self.device)
+        inferer.eval()
+        print("Successfully loaded inferer")
+
+        # load runner
+        runner = inference_module.runner.Runner(config, inferer)
+        print("Successfully loaded runner")
+
+        # train loop
+        runner.run_epoch(train_dict, val_dict, save_dir=save_dir)
 
     def sample_texture(self):
         z_val = [models.styleganv2.modules.make_noise(1, self.style_dim, 1, self.device)]
-        ntexture = self.generator(z_val)
+        ntexture = self.generator(z_val)['ntexture']
         return ntexture
 
     def load_smplx(self, sample_path):

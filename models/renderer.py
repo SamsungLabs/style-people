@@ -9,6 +9,21 @@ from models.styleganv2.op import FusedLeakyReLU
 from models.common.unet import Unetv2
 
 
+class Wrapper:
+    @staticmethod
+    def get_args(parser):
+        parser.add('--image_size', type=int, default=256)
+        parser.add('--style_dim', type=int, default=512)
+        parser.add('--n_mlp', type=int, default=8)
+        parser.add('--output_channels', type=int, default=3)
+
+    @staticmethod
+    def get_net(args):
+        net = Renderer()
+        net = net.to(args.device)
+        return net
+    
+    
 class Renderer(nn.Module):
     def __init__(self, in_channels=18, segm_channels=3, ngf=64, normalization='batch'):
         super().__init__()
