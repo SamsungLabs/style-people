@@ -18,8 +18,7 @@ from models.efficientnet import EfficientNetLevelEncoder
 
 
 
-def get_config(experiment_dir, divide_n_channels=1):        
-    config_path = os.path.join(experiment_dir, 'config.yaml')
+def get_config(config_path, divide_n_channels=1):        
     with open(config_path, 'r') as f:
         config_ = yaml.load(f, Loader=yaml.FullLoader)
 

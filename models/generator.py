@@ -143,8 +143,6 @@ class Generator(nn.Module):
         if not input_is_latent:
             styles = [self.style(s) for s in styles]
 
-        assert len(styles) == 14
-
 
         if noise is None:
             if randomize_noise:

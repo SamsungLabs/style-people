@@ -292,7 +292,6 @@ class Runner:
                     
 
                        
-                print('loss', loss.item())
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()

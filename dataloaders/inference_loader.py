@@ -35,7 +35,7 @@ class InferenceDataset():
         return frame_ids
 
     def load_rgb(self, frame_id):
-        rgb_path = os.path.join(self.samples_dir, f"{frame_id}_rgb.png")
+        rgb_path = os.path.join(self.samples_dir, f"{frame_id}_rgb.jpg")
         rgb = cv2.imread(rgb_path)[..., ::-1] / 255.
         return itt(rgb)
 
@@ -59,6 +59,10 @@ class InferenceDataset():
 
         for k, v in smpl_params.items():
             smpl_params[k] = torch.FloatTensor(v)
+            # print(k, v.shape)
+
+        smpl_params['left_hand_pose'] = smpl_params['left_hand_pose'][:, :6]
+        smpl_params['right_hand_pose'] = smpl_params['right_hand_pose'][:, :6]
 
         with torch.no_grad():
             smpl_output = self.smplx_model(**smpl_params)

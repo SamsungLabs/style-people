@@ -12,7 +12,7 @@ from utils.demo import DemoInferer
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--textures_root', type=str, default='data/textures')
-    parser.add_argument('--checkpoint_path', type=str, default='data/checkpoint.pth')
+    parser.add_argument('--checkpoint_path', type=str, default='data/checkpoints/generative_model.pth')
     parser.add_argument('--smplx_model_path', type=str, default='data/smplx/SMPLX_NEUTRAL.pkl')
     parser.add_argument('--texture_batch_name', type=str)
     parser.add_argument('--n_samples', type=int, default=10)

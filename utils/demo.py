@@ -55,17 +55,13 @@ def load_models(checkpoint_path='data/checkpoints/generative_model.pth', device=
 
 
 class DemoInferer():
-    def __init__(self, checkpoint_path, smplx_model_path, imsize=1024, device='cuda:0'):
+    def __init__(self, checkpoint_path, smplx_model_path, imsize=1024, config_path='data/config.yaml', device='cuda:0'):
 
         self.smplx_model_path = smplx_model_path
         self.smplx_model = smplx.body_models.SMPLX(smplx_model_path).to(device)
         
-        self.checkpoint_path = checkpoint_path
-        experiment_dir = '/'.join(self.checkpoint_path.split('/')[:-2])
-        checkpoint_file = self.checkpoint_path.split('/')[-1]
-        
-        self.generator_config = get_config(experiment_dir)
-        self.generator, self.renderer = load_models(checkpoint_path, device) # TODO: FIX
+        self.generator_config = get_config(config_path)
+        self.generator, self.renderer = load_models(checkpoint_path, device) 
 
         self.v_inds = torch.LongTensor(np.load('data/v_inds.npy')).to(device)
 
@@ -105,7 +101,7 @@ class DemoInferer():
 
     def sample_texture(self):
         z_val = [models.styleganv2.modules.make_noise(1, self.style_dim, 1, self.device)]
-        ntexture = self.generator(z_val)['ntexture']
+        ntexture = self.generator(z_val)
         return ntexture
 
     def load_smplx(self, sample_path):
