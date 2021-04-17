@@ -113,6 +113,13 @@ class Inferer(nn.Module):
         return torch.nn.functional.grid_sample(ntexture, uv.permute(0, 2, 3, 1), align_corners=True)
 
     def infer_pass(self, noise, verts, ntexture=None, uv=None, sampled_ntexture=None):
+
+        if verts is not None:
+            B = verts.shape[0]
+        else:
+            B = uv.shape[0]
+
+
         if uv is None and sampled_ntexture is None:
             uv = self.uv_renderer(verts)
 
@@ -122,8 +129,7 @@ class Inferer(nn.Module):
 
         if ntexture is None and sampled_ntexture is None:
             fake_ntexture = self.generator(noise, noise=self.noises, input_is_latent=True)
-
-            # fake_ntexture = g_out['fake_rgb']
+            fake_ntexture = torch.cat([fake_ntexture]*B, dim=0)
         else:
             fake_ntexture = ntexture
 

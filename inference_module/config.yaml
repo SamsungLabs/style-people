@@ -32,11 +32,9 @@ stages:
 
         optimization_targets:
             - latent
-            - beta
 
         lr:
             latent: 0.01
-            beta: 0.1
 
         loss_weight:
             lpips: 1.0
@@ -52,11 +50,9 @@ stages:
 
         optimization_targets:
             - generator
-            - beta
 
         lr: 
             generator: 0.01
-            beta: 0.1
 
         loss_weight:
             lpips: 1.0
@@ -72,11 +68,9 @@ stages:
 
         optimization_targets:
             - noise
-            - beta
 
         lr:
             noise: 0.1
-            beta: 0.1
 
         loss_weight:
             lpips: 1.0
@@ -95,7 +89,6 @@ stages:
 
         lr:
             ntexture: 0.15
-            beta: 0.1
 
         loss_weight:
             lpips: 1.0

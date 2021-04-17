@@ -132,18 +132,27 @@ class Runner:
     def make_smplx(self, train_dict):
         gender = train_dict['gender'][0]
 
-        smplx_output = self.smplx_models_dict[gender](
-                    global_orient=train_dict['global_orient'],
-                    transl=train_dict['transl'],
-                    betas=self.inferer.betas,
-                    expression=train_dict['expressions'],
-                    body_pose=train_dict['body_pose'],
-                    left_hand_pose=train_dict['left_hand_pose'][:, :6],
-                    right_hand_pose=train_dict['right_hand_pose'][:, :6],
-                    jaw_pose=train_dict['jaw_pose'],
-                )
+        B = train_dict['global_orient'].shape[0]
+        verts_list = []
 
-        return smplx_output
+        for i in range(B):
+            smplx_output = self.smplx_models_dict[gender](
+                        global_orient=train_dict['global_orient'][i:i+1],
+                        transl=train_dict['transl'][i:i+1],
+                        betas=self.inferer.betas[i:i+1],
+                        expression=train_dict['expressions'][i:i+1],
+                        body_pose=train_dict['body_pose'][i:i+1],
+                        left_hand_pose=train_dict['left_hand_pose'][i:i+1, :6],
+                        right_hand_pose=train_dict['right_hand_pose'][i:i+1, :6],
+                        jaw_pose=train_dict['jaw_pose'][i:i+1],
+                    )
+            verts = smplx_output.vertices
+            verts_list.append(verts)
+
+        verts = torch.cat(verts_list, dim=0)
+
+
+        return verts
 
     def run_epoch(self, train_dict):
         # self.inferer.eval()
@@ -166,7 +175,6 @@ class Runner:
         self.inferer.latent.data = encoder_latent.detach().clone()
 
         # save initial ntexture
-
         with torch.no_grad():
             infer_output_dict = self.inferer.infer_pass(
                 torch.cat([self.inferer.latent] * len(train_dict['real_rgb']), dim=0),
@@ -178,6 +186,7 @@ class Runner:
         initial_ntexture = infer_output_dict['fake_ntexture'][:1].detach().clone()
 
         stages = sorted(self.config.stages.keys())
+        # stages = stages[-1:]
         for stage in stages:
             stage_config = self.config.stages[stage]
 
@@ -211,9 +220,7 @@ class Runner:
             for i in pbar:
                 torch.autograd.set_grad_enabled(True)
 
-                smplx_output = self.make_smplx(train_dict)
-
-                verts_3d = smplx_output.vertices
+                verts_3d = self.make_smplx(train_dict)
                 verts_3d = verts_3d[:, v_inds]
 
                 verts_ndc, matrix_ndc = self.inferer.diff_uv_renderer.convert_to_ndc(
@@ -291,7 +298,6 @@ class Runner:
                 else:
                     face_image_pred = None
                     face_image_target = None
-                    
 
                        
                 optimizer.zero_grad()
