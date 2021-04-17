@@ -33,7 +33,6 @@ stages:
         optimization_targets:
             - latent
             - beta
-            # - body_pose
 
         lr:
             latent: 0.01
@@ -46,9 +45,6 @@ stages:
             encoder_latent_deviation: 0.1
             generator_params_deviation: 0.0
             ntexture_deviation: 0.0
-            unary_discriminator_nonsaturating: 0.0
-            unary_discriminator_feature_matching: 0.0
-            unary_face_discriminator_feature_matching: 0.0
 
     stage_2:
         input_source: latent_and_noise
@@ -69,9 +65,6 @@ stages:
             encoder_latent_deviation: 0.0
             generator_params_deviation: 1.0
             ntexture_deviation: 0.0  ## TODO
-            unary_discriminator_nonsaturating: 0.0
-            unary_discriminator_feature_matching: 0.0
-            unary_face_discriminator_feature_matching: 0.0
 
     stage_3:
         input_source: latent_and_noise
@@ -92,9 +85,6 @@ stages:
             encoder_latent_deviation: 0.0
             generator_params_deviation: 0.0
             ntexture_deviation: 0.0
-            unary_discriminator_nonsaturating: 0.0
-            unary_discriminator_feature_matching: 0.0
-            unary_face_discriminator_feature_matching: 0.0
         
     stage_4:
         input_source: ntexture
@@ -114,9 +104,6 @@ stages:
             encoder_latent_deviation: 0.0
             generator_params_deviation: 0.0
             ntexture_deviation: 0.1
-            unary_discriminator_nonsaturating: 0.0
-            unary_discriminator_feature_matching: 0.0
-            unary_face_discriminator_feature_matching: 0.0
             
 generator:
     experiment_dir: data

@@ -3,6 +3,8 @@ import numpy as np
 import smplx
 import torch
 import importlib
+from torch.utils.data import DataLoader
+from collections import defaultdict
 
 import models
 from models.generator import Generator
@@ -14,20 +16,48 @@ from utils.uv_renderer import UVRenderer
 
 import os
 import collections
-import pydoc
-
-import hydra
-from omegaconf import OmegaConf 
-import yaml
 
 import inference_module
-from dataloaders.inference_loader import ExampleDataset
+from dataloaders.inference_loader import InferenceDataset
 
-from inference_module.inferer import load_models, get_config
+from inference_module.inferer import get_config
+
+
+def concat_all_samples(dataloader):
+    datadicts = defaultdict(list)
+
+    for data_dict in dataloader:
+        for k, v in data_dict.items():
+            datadicts[k].append(v)
+
+    dict_combined = {}
+    for k, v in datadicts.items():
+        dict_combined[k] = torch.cat(v, dim=0)
+
+    return dict_combined
+
+def load_models(checkpoint_path='data/checkpoints/generative_model.pth', device='cuda:0'):
+    ainp_path = 'data/spectral_texture16.pth'
+    ainp_scales = [64, 128, 256, 512]
+
+    ainp_tensor = torch.load(ainp_path)
+    generator = Generator(ainp_tensor=ainp_tensor, ainp_scales=ainp_scales).to(device)
+    renderer = Renderer().to(device)
+
+    checkpoint = torch.load(checkpoint_path)
+    generator.load_state_dict(checkpoint['g'])
+    renderer.load_state_dict(checkpoint['r'])
+
+    generator.eval()
+    renderer.eval()
+
+    return generator, renderer
 
 
 class DemoInferer():
     def __init__(self, checkpoint_path, smplx_model_path, imsize=1024, device='cuda:0'):
+
+        self.smplx_model_path = smplx_model_path
         self.smplx_model = smplx.body_models.SMPLX(smplx_model_path).to(device)
         
         self.checkpoint_path = checkpoint_path
@@ -35,10 +65,12 @@ class DemoInferer():
         checkpoint_file = self.checkpoint_path.split('/')[-1]
         
         self.generator_config = get_config(experiment_dir)
-        self.models = load_models(experiment_dir, self.generator_config, checkpoint_file)
+        self.generator, self.renderer = load_models(checkpoint_path, device) # TODO: FIX
 
-        self.generator, self.renderer = self.models['generator'], self.models['renderer']
         self.v_inds = torch.LongTensor(np.load('data/v_inds.npy')).to(device)
+
+
+        self.image_size = imsize
         self.input_size = imsize // 2  # input resolution is twice as small as output
 
         self.uv_renderer = UVRenderer(self.input_size, self.input_size).to(device)
@@ -46,31 +78,30 @@ class DemoInferer():
         self.device = device
         self.style_dim = 512
         
-    def infer(self, config, input_path, train_frames, val_frames, save_dir):
+    def infer(self, config, input_path):
         # setup environment
         setup_environment(config.random_seed)
-
-        dataloader = ExampleDataset(root_dir=input_path, image_h=self.input_size, image_w=self.input_size)
-        train_dict = dataloader.load(frame_indices=list(map(int, train_frames.split(','))))
-        train_dict = dict2device(train_dict, self.device, dtype=torch.float32)
-
-        val_dict = dataloader.load(frame_indices=list(map(int, val_frames.split(','))))
-        val_dict = dict2device(val_dict, self.device, dtype=torch.float32)
+        dataset = InferenceDataset(input_path, self.image_size, self.v_inds, self.smplx_model_path)
+        dataloader = DataLoader(dataset)
+        train_dict = concat_all_samples(dataloader)
+        train_dict = dict2device(train_dict, self.device)
 
         print("Successfully loaded data")
 
         # load inferer
-        inferer = inference_module.inferer.Inferer(self.models, self.generator_config, config)
+        inferer = inference_module.inferer.Inferer(self.generator, self.renderer, self.generator_config, config)
         inferer = inferer.to(self.device)
         inferer.eval()
         print("Successfully loaded inferer")
 
         # load runner
-        runner = inference_module.runner.Runner(config, inferer)
+        runner = inference_module.runner.Runner(config, inferer, self.smplx_model, self.image_size)
         print("Successfully loaded runner")
 
         # train loop
-        runner.run_epoch(train_dict, val_dict, save_dir=save_dir)
+        ntexture = runner.run_epoch(train_dict)
+
+        return ntexture
 
     def sample_texture(self):
         z_val = [models.styleganv2.modules.make_noise(1, self.style_dim, 1, self.device)]
