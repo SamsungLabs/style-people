@@ -12,7 +12,7 @@ from utils.demo import DemoInferer
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--checkpoint_path', type=str, default='data/checkpoints/generative_model.pth')
-    parser.add_argument('--smplx_model_path', type=str, default='data/smplx/SMPLX_MALE.pkl')
+    parser.add_argument('--smplx_model_dir', type=str, default='data/smplx/')
     parser.add_argument('--texture_path', type=str)
     parser.add_argument('--smplx_dict_path', type=str)
     parser.add_argument('--save_dir', type=str)
@@ -22,7 +22,7 @@ if __name__ == '__main__':
 
     os.makedirs(args.save_dir, exist_ok=True)
 
-    inferer = DemoInferer(args.checkpoint_path, args.smplx_model_path, imsize=args.imsize, device=args.device)
+    inferer = DemoInferer(args.checkpoint_path, args.smplx_model_dir, imsize=args.imsize, device=args.device)
     ntexture = torch.load(args.texture_path).to(args.device)
 
     vertices, K = inferer.load_smplx(args.smplx_dict_path)

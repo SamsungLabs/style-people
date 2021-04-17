@@ -13,7 +13,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--textures_root', type=str, default='data/textures')
     parser.add_argument('--checkpoint_path', type=str, default='data/checkpoints/generative_model.pth')
-    parser.add_argument('--smplx_model_path', type=str, default='data/smplx/SMPLX_NEUTRAL.pkl')
+    parser.add_argument('--smplx_model_dir', type=str, default='data/smplx')
     parser.add_argument('--texture_batch_name', type=str)
     parser.add_argument('--n_samples', type=int, default=10)
     parser.add_argument('--n_rotimgs', type=int, default=8)
@@ -24,7 +24,7 @@ if __name__ == '__main__':
 
     set_random_seed(args.seed)
 
-    inferer = DemoInferer(args.checkpoint_path, args.smplx_model_path, imsize=args.imsize, device=args.device)
+    inferer = DemoInferer(args.checkpoint_path, args.smplx_model_dir, imsize=args.imsize, device=args.device)
 
     for i in tqdm(range(args.n_samples)):
         with torch.no_grad():

@@ -13,6 +13,7 @@ from utils.bbox import get_ltrb_bbox, crop_resize_verts
 from utils.common import get_rotation_matrix, rotate_verts, to_sigm
 from utils.common import dict2device, setup_environment
 from utils.uv_renderer import UVRenderer
+from utils.smplx_models import build_smplx_model_dict
 
 import os
 import collections
@@ -32,7 +33,10 @@ def concat_all_samples(dataloader):
 
     dict_combined = {}
     for k, v in datadicts.items():
-        dict_combined[k] = torch.cat(v, dim=0)
+        if type(v[0]) == torch.Tensor:
+            dict_combined[k] = torch.cat(v, dim=0)
+        elif type(v[0]) == list:
+            dict_combined[k] = [x[0] for x in v]
 
     return dict_combined
 
@@ -54,11 +58,13 @@ def load_models(checkpoint_path='data/checkpoints/generative_model.pth', device=
     return generator, renderer
 
 
-class DemoInferer():
-    def __init__(self, checkpoint_path, smplx_model_path, imsize=1024, config_path='data/config.yaml', device='cuda:0'):
 
-        self.smplx_model_path = smplx_model_path
-        self.smplx_model = smplx.body_models.SMPLX(smplx_model_path).to(device)
+
+class DemoInferer():
+    def __init__(self, checkpoint_path, smplx_model_dir, imsize=1024, config_path='data/config.yaml', device='cuda:0'):
+
+        self.smplx_model_dir = smplx_model_dir
+        self.smplx_models_dict = build_smplx_model_dict(smplx_model_dir, device)
         
         self.generator_config = get_config(config_path)
         self.generator, self.renderer = load_models(checkpoint_path, device) 
@@ -77,7 +83,7 @@ class DemoInferer():
     def infer(self, config, input_path):
         # setup environment
         setup_environment(config.random_seed)
-        dataset = InferenceDataset(input_path, self.image_size, self.v_inds, self.smplx_model_path)
+        dataset = InferenceDataset(input_path, self.image_size, self.v_inds, self.smplx_model_dir)
         dataloader = DataLoader(dataset)
         train_dict = concat_all_samples(dataloader)
         train_dict = dict2device(train_dict, self.device)
@@ -91,7 +97,7 @@ class DemoInferer():
         print("Successfully loaded inferer")
 
         # load runner
-        runner = inference_module.runner.Runner(config, inferer, self.smplx_model, self.image_size)
+        runner = inference_module.runner.Runner(config, inferer, self.smplx_models_dict, self.image_size)
         print("Successfully loaded runner")
 
         # train loop
@@ -108,10 +114,13 @@ class DemoInferer():
         with open(sample_path, 'rb') as f:
             smpl_params = pickle.load(f)
 
-        for k, v in smpl_params.items():
-            smpl_params[k] = torch.FloatTensor(v).to(self.device)
+        gender = smpl_params['gender']
 
-        smpl_output = self.smplx_model(**smpl_params)
+        for k, v in smpl_params.items():
+            if type(v) == np.ndarray:
+                smpl_params[k] = torch.FloatTensor(v).to(self.device)
+
+        smpl_output = self.smplx_models_dict[gender](**smpl_params)
         vertices = smpl_output.vertices
         vertices = vertices[:, self.v_inds]
         K = smpl_params['camera_intrinsics'].unsqueeze(0)

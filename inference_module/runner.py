@@ -18,10 +18,10 @@ from inference_module.criterion import LPIPSCriterion, MSECriterion, MAECriterio
     
 
 class Runner:
-    def __init__(self, config, inferer, smplx_model, image_size, device='cuda:0'):
+    def __init__(self, config, inferer, smplx_models_dict, image_size, device='cuda:0'):
         self.config = config
         self.inferer = inferer
-        self.smplx_model = smplx_model
+        self.smplx_models_dict = smplx_models_dict
 
         self.image_size = image_size
         self.input_size = image_size // 2
@@ -130,7 +130,9 @@ class Runner:
         return face, valid_mask
 
     def make_smplx(self, train_dict):
-        smplx_output = self.smplx_model(
+        gender = train_dict['gender'][0]
+
+        smplx_output = self.smplx_models_dict[gender](
                     global_orient=train_dict['global_orient'],
                     transl=train_dict['transl'],
                     betas=self.inferer.betas,

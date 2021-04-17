@@ -7,11 +7,12 @@ import torch
 import smplx
 from utils.common import json2kps, itt, to_tanh
 from utils.bbox import crop_resize_coords, get_ltrb_bbox, crop_resize_verts, crop_resize_coords, crop_resize_image
+from utils.smplx_models import build_smplx_model_dict
 import pickle
 
 
 class InferenceDataset():
-    def __init__(self, samples_dir, image_size, v_inds, smplx_model_path):
+    def __init__(self, samples_dir, image_size, v_inds, smplx_model_dir):
         self.samples_dir = samples_dir
         self.frame_list = self.list_samples(self.samples_dir)
 
@@ -20,11 +21,9 @@ class InferenceDataset():
         self.input_size = image_size // 2
 
 
-        print('loader self.image_size', self.image_size)
-        print('loader self.input_size', self.input_size)
         self.v_inds = v_inds
 
-        self.smplx_model = smplx.body_models.SMPLX(smplx_model_path)
+        self.smplx_models_dict = build_smplx_model_dict(smplx_model_dir, device='cpu')
 
     @staticmethod
     def list_samples(samples_dir):
@@ -57,23 +56,22 @@ class InferenceDataset():
         with open(smplx_path, 'rb') as f:
             smpl_params = pickle.load(f)
 
+        gender = smpl_params['gender']
         for k, v in smpl_params.items():
-            smpl_params[k] = torch.FloatTensor(v)
-            # print(k, v.shape)
+            if type(v) == np.ndarray:
+                smpl_params[k] = torch.FloatTensor(v)
 
         smpl_params['left_hand_pose'] = smpl_params['left_hand_pose'][:, :6]
         smpl_params['right_hand_pose'] = smpl_params['right_hand_pose'][:, :6]
 
         with torch.no_grad():
-            smpl_output = self.smplx_model(**smpl_params)
+            smpl_output = self.smplx_models_dict[gender](**smpl_params)
         vertices = smpl_output.vertices.detach()
         vertices = vertices[:, self.v_inds]
         K = smpl_params['camera_intrinsics'].unsqueeze(0)
         vertices = torch.bmm(vertices, K.transpose(1, 2))
         smpl_params.pop('camera_intrinsics')
-
-        # vertices = vertices[0].numpy()
-        # K = K[0].numpy()
+        smpl_params['gender'] = [smpl_params['gender']]
 
         return vertices, K, smpl_params
 
