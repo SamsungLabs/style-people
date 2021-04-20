@@ -13,6 +13,7 @@ To use this repository you first need to download model checkpoints and some aux
 	* A few samples from *AzurePeople* dataset to run inference script on (`data/inference_samples`)
 	* A sample of smplx parameters (`data/smplx_sample.pkl`)
 	* Some auxiliary data (`data/uv_render` and `data/*.{yaml,pth,npy}`)
+* Download SMPLX models (`SMPLX_{MALE,FEMALE,NEUTRAL}.pkl`) from [its' project page](https://smpl-x.is.tue.mpg.de/) and move them to `data/smplx/`
 
 ### Docker
 The easiest way to build an environment for this repository is to use docker image. To build it, make the following steps:
