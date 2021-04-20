@@ -11,14 +11,14 @@ from omegaconf import OmegaConf
 
 def main():
     parser = argparse.ArgumentParser(description='')
-    parser.add_argument('--checkpoint_path', type=str, default='data/checkpoints/generative_model.pth')
+    parser.add_argument('--checkpoint_path', type=str, default='data/checkpoints/generative_model.pth', help='Path to generative model checkpoint')
     parser.add_argument('--config_path', type=str, default='inference_module/config.yaml')
-    parser.add_argument('--smplx_model_dir', type=str, default='data/smplx/')
-    parser.add_argument('--input_path', type=str, default='data/inference_samples/azure_02')
-    parser.add_argument('--texture_out_dir', type=str, default='data/textures/azure_02')
-    parser.add_argument('--imsize', type=int, default=1024)
-    parser.add_argument('--n_rotimgs', type=int, default=8)
-    parser.add_argument('--device', type=str, default='cuda:0')
+    parser.add_argument('--smplx_model_dir', type=str, default='data/smplx/', help='Path to smplx models')
+    parser.add_argument('--input_path', type=str, default='data/inference_samples/azure_02', help='Path to a directory that contains data samples')
+    parser.add_argument('--texture_out_dir', type=str, default='data/textures/azure_02', help='Path to a directory to save fitted texture in')
+    parser.add_argument('--n_rotimgs', type=int, default=8, help='Number of rotation steps to render textured model in')
+    parser.add_argument('--imsize', type=int, default=1024, help='Resolution in which to render rotation steps')
+    parser.add_argument('--device', type=str, default='cuda:0', help='Device to run inference process on')
     args = parser.parse_args()
 
     texture_save_dir = args.texture_out_dir

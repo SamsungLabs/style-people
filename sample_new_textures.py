@@ -11,7 +11,7 @@ from utils.demo import DemoInferer
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='')
-    parser.add_argument('--textures_root', type=str, default='data/textures', help='Root deractory to store textures in')
+    parser.add_argument('--textures_root', type=str, default='data/textures', help='Root directory to store textures in')
     parser.add_argument('--checkpoint_path', type=str, default='data/checkpoints/generative_model.pth', help='Path to generative model checkpoint')
     parser.add_argument('--smplx_model_dir', type=str, default='data/smplx', help='Path to smplx models')
     parser.add_argument('--texture_batch_name', type=str, help='An identifier for the current run of this script')
