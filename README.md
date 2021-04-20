@@ -35,7 +35,7 @@ pip install git+https://github.com/rmbashirov/minimal_pytorch_rasterizer
 This repository provides three scripts with three scenarios, as it is shown on the scheme below:
 
 <p align="center">
-  <img src="./assets/scripts_scheme.gif" alt="drawing", width="1280"/>
+  <img src="./assets/scripts_scheme.png" alt="drawing", width="1280"/>
 </p>
 
 Below are brief descriptions and examples of usage for these scripts. Please see their argparse help message for more details.
