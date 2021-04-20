@@ -3,5 +3,4 @@ PORT=8087
 
 PARAMS="-p ${PORT}:${PORT} --net=host --ipc=host -u $(id -u ${USER}):$(id -g ${USER})"
 NAME="stylepeople"
-HEAD_NAME="airuhead01:5000/${NAME}"
 VOLUMES="-v /:/mounted"
