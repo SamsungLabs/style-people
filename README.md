@@ -1,14 +1,15 @@
 
 # StylePeople
 
-This is repository with inference code for paper **"StylePeople: A Generative Model of Fullbody Human Avatars"** (CVPR21).
-This code is for the part of the paper describing generative neural textures model. For inference of video-based avatars refer to [this repository TODO](https://github.com/)
+This is repository with inference code for paper [**"StylePeople: A Generative Model of Fullbody Human Avatars"**](https://arxiv.org/pdf/2104.08363.pdf) (CVPR21).
+This code is for the part of the paper describing generative neural textures model. For inference of video-based avatars refer to [this repository](https://github.com/saic-vul/neural-textures).
 
 ## Getting started
 ### Data
 To use this repository you first need to download model checkpoints and some auxiliary files.
 
-* Download the archive with data from [THIS LINK TODO](https://drive.google.com/) and unpack in into `StylePeople/data/`. It contains:
+<<<<<<< HEAD
+* Download the archive with data from [THIS LINK TODO](https://drive.google.com/drive/folders/1YcY3WtCGyq6c0cZIcCG1rll7HGZb_JXc?usp=sharing) and unpack in into `StylePeople/data/`. It contains:
 	* checkpoints for generative model and encoder network (`data/checkpoint`)
 	* A few samples from *AzurePeople* dataset to run inference script on (`data/inference_samples`)
 	* A sample of smplx parameters (`data/smplx_sample.pkl`)
