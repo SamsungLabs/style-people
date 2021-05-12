@@ -8,7 +8,7 @@ This code is for the part of the paper describing generative neural textures mod
 ### Data
 To use this repository you first need to download model checkpoints and some auxiliary files.
 
-* Download the archive with data from [Google Drive](https://drive.google.com/drive/folders/1YcY3WtCGyq6c0cZIcCG1rll7HGZb_JXc?usp=sharing) and unpack in into `StylePeople/data/`. It contains:
+* Download the archive with data from [Google Drive](https://drive.google.com/file/d/1xfsCIy5Xn_fS9uqC23svB_tjiJw543ZF/view?usp=sharing) and unpack in into `StylePeople/data/`. It contains:
 	* checkpoints for generative model and encoder network (`data/checkpoint`)
 	* A few samples from *AzurePeople* dataset to run inference script on (`data/inference_samples`)
 	* A sample of smplx parameters (`data/smplx_sample.pkl`)
