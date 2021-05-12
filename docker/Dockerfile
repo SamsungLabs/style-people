@@ -91,7 +91,7 @@ COPY requirements.txt requirements.txt
 RUN pip --no-cache-dir install -r requirements.txt
 RUN conda install pytorch torchvision cudatoolkit=10.1 -c pytorch
 
-## FAILING TO DUN DURING DOKER BUILD, INSTALL INSIDE DOCKER
+## FAILS TO RUN DURING DOKER BUILD, INSTALL INSIDE DOCKER
 #RUN pip install git+https://github.com/rmbashirov/minimal_pytorch_rasterizer
 
 
