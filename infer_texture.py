@@ -11,11 +11,7 @@ from omegaconf import OmegaConf
 
 def main():
     parser = argparse.ArgumentParser(description='')
-<<<<<<< HEAD
-    parser.add_argument('--checkpoint_path', type=str, default='data/checkpoints/generative_model.pth', help='Path to generative model checkpoint')
-=======
     parser.add_argument('--checkpoint_path', type=str, default='data/checkpoint/generative_model.pth', help='Path to generative model checkpoint')
->>>>>>> master
     parser.add_argument('--config_path', type=str, default='inference_module/config.yaml')
     parser.add_argument('--smplx_model_dir', type=str, default='data/smplx/', help='Path to smplx models')
     parser.add_argument('--input_path', type=str, default='data/inference_samples/azure_02', help='Path to a directory that contains data samples')
