@@ -58,7 +58,7 @@ will sample 10 neural textures and save them to `data/textures/my_run`
 
 Example:
 ```
-infer_texture.py --input_path=data/inference_samples/azure_04 --texture_out_dir=data/textures/azure_04
+python infer_texture.py --input_path=data/inference_samples/azure_04 --texture_out_dir=data/textures/azure_04
 ```
 will load all data samples from `data/inference_samples/azure_04` and save inferred texture to `data/textures/azure_04`
 
