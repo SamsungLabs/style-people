@@ -78,7 +78,7 @@ class Inferer(nn.Module):
         self.encoder = EfficientNetLevelEncoder(
             **utils.common.return_empty_dict_if_none(encoder_config.model.encoder.args)
         )
-        state_dict = torch.load(os.path.join(config.encoder.experiment_dir, "checkpoints", config.encoder.checkpoint_name))
+        state_dict = torch.load(os.path.join(config.encoder.experiment_dir, "checkpoint", config.encoder.checkpoint_name))
         self.encoder.load_state_dict(state_dict['inferer']['encoder'])
         self.encoder.eval()
         for p in self.encoder.parameters():

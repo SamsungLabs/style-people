@@ -245,6 +245,8 @@ class Runner:
                 image_pred = infer_output_dict['fake_img']
                 segm_pred = infer_output_dict['fake_segm']
                 ntexture_pred = infer_output_dict['fake_ntexture']
+                if i == 0:
+                    torch.save(ntexture_pred, f'data/textures/step_by_step/texture_{stage}.pth')
 
                 # calculate losses
                 loss = 0.0
