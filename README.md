@@ -45,7 +45,7 @@ This repository provides three scripts with three scenarios, as it is shown on t
 Below are brief descriptions and examples of usage for these scripts. Please see their argparse help message for more details.
 
 ### Sample texture from generative model
-`sample_new_textures.py` samples a number of neural textures from generative model and saves them on disc.
+`python sample_new_textures.py` samples a number of neural textures from generative model and saves them on disc.
 
 Example:
 ```
