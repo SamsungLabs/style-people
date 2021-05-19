@@ -32,7 +32,7 @@ def main():
     texture_out_path = os.path.join(texture_save_dir, 'texture.pth')
     torch.save(ntexture.cpu(), texture_out_path)
     if args.n_rotimgs > 0:
-        rot_images = inferer.make_rotation_images(ntexture, args.n_rotimgs)
+        rot_images, _ = inferer.make_rotation_images(ntexture, args.n_rotimgs)
 
         for j, rgb in enumerate(rot_images):
             rgb = tti(rgb)
