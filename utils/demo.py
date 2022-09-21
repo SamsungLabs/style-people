@@ -118,6 +118,8 @@ class DemoInferer():
 
         for k, v in smpl_params.items():
             if type(v) == np.ndarray:
+                if 'hand_pose' in k:
+                    v = v[:, :6]
                 smpl_params[k] = torch.FloatTensor(v).to(self.device)
 
         smpl_output = self.smplx_models_dict[gender](**smpl_params)
@@ -134,6 +136,7 @@ class DemoInferer():
 
     def make_rgb(self, vertices, ntexture):
         uv = self.uv_renderer(vertices, negbg=True)
+
         nrender = torch.nn.functional.grid_sample(ntexture, uv.permute(0, 2, 3, 1), align_corners=True)
         renderer_input = dict(uv=uv, nrender=nrender)
 
@@ -159,4 +162,4 @@ class DemoInferer():
             rgb = self.make_rgb(verts_rot, ntexture)
             rgb_frames.append(rgb)
 
-        return rgb_frames
+        return rgb_frames, ltrb

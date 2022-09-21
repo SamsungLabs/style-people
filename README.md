@@ -1,14 +1,16 @@
 
 # StylePeople
 
+### <img align=center src=./assets/icons/project.png width='32'/> [Project](https://saic-violet.github.io/style-people/) &ensp; <img align=center src=./assets/icons/paper.png width='24'/> [Paper](https://arxiv.org/pdf/2104.08363.pdf) &ensp;  
+
 This is repository with inference code for paper [**"StylePeople: A Generative Model of Fullbody Human Avatars"**](https://arxiv.org/pdf/2104.08363.pdf) (CVPR21).
-This code is for the part of the paper describing generative neural textures model. For inference of video-based avatars refer to [this repository](https://github.com/saic-vul/neural-textures).
+This code is for the part of the paper describing generative neural textures model. For inference of video-based avatars refer to [this repository](https://github.com/dolorousrtur/neural-textures).
 
 ## Getting started
 ### Data
 To use this repository you first need to download model checkpoints and some auxiliary files.
 
-* Download the archive with data from [Google Drive](https://drive.google.com/drive/folders/1-Rzn0fR4Rq2VKS7EUg8hCdJwFe4niNJr?usp=sharing) and unpack in into `StylePeople/data/`. It contains:
+* Download the archive with data from [Google Drive](https://drive.google.com/file/d/1xfsCIy5Xn_fS9uqC23svB_tjiJw543ZF/view?usp=sharing) and unpack in into `StylePeople/data/`. It contains:
 	* checkpoints for generative model and encoder network (`data/checkpoint`)
 	* A few samples from *AzurePeople* dataset to run inference script on (`data/inference_samples`)
 	* A sample of smplx parameters (`data/smplx_sample.pkl`)
@@ -43,7 +45,7 @@ This repository provides three scripts with three scenarios, as it is shown on t
 Below are brief descriptions and examples of usage for these scripts. Please see their argparse help message for more details.
 
 ### Sample texture from generative model
-`sample_new_textures.py` samples a number of neural textures from generative model and saves them on disc.
+`python sample_new_textures.py` samples a number of neural textures from generative model and saves them on disc.
 
 Example:
 ```
@@ -56,7 +58,7 @@ will sample 10 neural textures and save them to `data/textures/my_run`
 
 Example:
 ```
-infer_texture.py --input_path=data/inference_samples/azure_04 --texture_out_dir=data/textures/azure_04
+python infer_texture.py --input_path=data/inference_samples/azure_04 --texture_out_dir=data/textures/azure_04
 ```
 will load all data samples from `data/inference_samples/azure_04` and save inferred texture to `data/textures/azure_04`
 

@@ -12,11 +12,7 @@ from utils.demo import DemoInferer
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--textures_root', type=str, default='data/textures', help='Root directory to store textures in')
-<<<<<<< HEAD
-    parser.add_argument('--checkpoint_path', type=str, default='data/checkpoints/generative_model.pth', help='Path to generative model checkpoint')
-=======
     parser.add_argument('--checkpoint_path', type=str, default='data/checkpoint/generative_model.pth', help='Path to generative model checkpoint')
->>>>>>> master
     parser.add_argument('--smplx_model_dir', type=str, default='data/smplx', help='Path to smplx models')
     parser.add_argument('--texture_batch_name', type=str, help='An identifier for the current run of this script')
     parser.add_argument('--n_samples', type=int, default=10, help='Number of textures to sample')
@@ -43,7 +39,7 @@ if __name__ == '__main__':
         torch.save(ntexture.cpu(), texture_out_path)
 
         if args.n_rotimgs > 0:
-            rot_images = inferer.make_rotation_images(ntexture, args.n_rotimgs)
+            rot_images, ltrb = inferer.make_rotation_images(ntexture, args.n_rotimgs)
 
             for j, rgb in enumerate(rot_images):
                 rgb = tti(rgb)
